@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="echarts.js"></script>
+    <script src="data.js"></script>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .echarts{
+        width: 600px;
+        height: 400px;
+        margin: 20px auto;
+    }
+    .scatter{
+        width: 70%;
+        height: 600px;
+        margin: 20px auto;
+    }
+</style>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div class="echarts" ></div>
+<div class="echarts"></div>
+<div class="echarts"></div>
+<div class="echarts"></div>
+<div class="scatter"></div>
+
+<script src="main.js"></script>
+<script>
+    let main = document.querySelectorAll('.echarts');
+    let film = echarts.init(main[3]);
+    let filmOption ={
+        backgroundColor: '#2c343c',
+
+        title: {
+            text: '豆瓣top250',
+            left: 'center',
+            top: 20,
+            textStyle: {
+                color: '#ccc'
+            }
+        },
+        series : [
+            {
+                name:'豆瓣top250',
+                type:'pie',
+                data:[]
+            }
+        ]
+    }
+    let arr =[];
+    for (let i=1;i<categories.length;i++){
+        let name = categories[i];
+        let value = data.filter(ele=>ele[4].includes(name)).length;
+        arr.push({name,value});
+    }
+    console.log(arr);
+    filmOption.series[0].data=arr;
+    film.setOption(filmOption);
+</script>
+<script>
+    let scatters = document.querySelector('.scatter');
+    let tops = echarts.init(scatters);
+
+    let selected={};
+    let series =[];
+    categories.forEach(category=>{
+        let movie = data.filter(ele=>ele[4].includes(category));
+        if (category=='全部'){
+            selected[category]=true;
+        }else {
+            selected[category]=false;
+        }
+
+        let obj={
+            name: category,
+            data: category=='全部'?data:movie,
+            type: 'scatter',
+            symbolSize: function (data) {
+                return Math.ceil(data[2]) / 10;
+            },
+            label: {
+                emphasis: {
+                    show: true,
+                    formatter: function (param) {
+                        return param.data[3];
+                    },
+                    position: 'top',
+                    color:'black'
+                }
+            },
+        }
+        series.push(obj);
+
+    })
+    let option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'
+        }, {
+            offset: 1,
+            color: '#f6f6f6'
+        }]),
+        title: {
+            text: '豆瓣Top250电影榜',
+            left: 'center'
+        },
+        xAxis: {
+            splitLine: {
+                lineStyle: {
+                    type: 'dashed'
+                }
+            }
+        },
+        yAxis: {
+            splitLine: {
+                lineStyle: {
+                    type: 'dashed'
+                }
+            },
+            scale: true
+        },
+        tooltip : {
+            trigger: 'item',
+            formatter: function (params) {
+                let data = params.data;
+                return `
+                        电影名：${data[3]}<br>
+                        评分：${data[1]}<br>
+                        类型：${data[4]}
+                `
+            }
+        },
+        legend: {
+            type: 'scroll',
+            orient: 'vertical',
+            right: 10,
+            top: 20,
+            bottom: 20,
+            data: categories,
+            selected,
+            selectedMode:'single'
+        },
+        series,
+    }
+    tops.setOption(option);
+</script>
+</body>
+</html>
